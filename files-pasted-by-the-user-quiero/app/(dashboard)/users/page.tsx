@@ -1,0 +1,3 @@
+import { UserForm } from "@/components/user-form";
+import { prisma } from "@/lib/prisma";
+export default async function UsersPage() { const users = await prisma.user.findMany({ orderBy: { name: "asc" } }); return <section><div className="mb-6 flex items-end justify-between"><div><p className="muted">Accesos y permisos</p><h1 className="text-2xl font-bold">Usuarios</h1></div><UserForm/></div><div className="card divide-y">{users.map(u => <div key={u.id} className="flex items-center justify-between p-4"><div><b>{u.name}</b><p className="muted">{u.email}</p></div><div className="text-right"><span className="badge bg-blue-50 text-blue-700">{u.role}</span><p className="mt-1 text-xs text-slate-500">{u.status}</p></div></div>)}</div></section>; }

@@ -1,0 +1,3 @@
+import { Role } from "@prisma/client"; import { NextRequest, NextResponse } from "next/server"; import { sessionFromRequest, requireRole } from "@/lib/auth"; import { prisma } from "@/lib/prisma"; import { categorySchema } from "@/validations";
+export async function GET() { return NextResponse.json(await prisma.category.findMany({ orderBy: { name: "asc" } })); }
+export async function POST(request: NextRequest) { try { requireRole(sessionFromRequest(request), [Role.ADMINISTRADOR]); return NextResponse.json(await prisma.category.create({ data: categorySchema.parse(await request.json()) }), { status: 201 }); } catch (e) { return NextResponse.json({ error: e instanceof Error ? e.message : "Error" }, { status: 400 }); } }
