@@ -2,7 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { ProductActions } from "@/components/product-actions"; import { getSession } from "@/lib/auth";
 
-export default async function ProductsPage() { const session = await getSession(); const canManage = session.role === "ADMINISTRADOR" || session.role === "OPERADOR";
+export default async function ProductsPage() { const session = await getSession(); const canManage = String(session.role) === "ADMINISTRADOR" || String(session.role) === "OPERADOR";
   const products = await prisma.product.findMany({
     include: {
       category: true,
