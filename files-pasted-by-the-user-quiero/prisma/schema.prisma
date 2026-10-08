@@ -10,7 +10,7 @@ datasource db {
 enum Role {
   ADMINISTRADOR
   OPERADOR
-  VISUALIZADOR
+  VENDEDOR
 }
 
 enum Status {
@@ -27,8 +27,10 @@ enum MovementType {
 model User {
   id String @id @default(cuid())
   name String
-  email String @unique
-  role Role @default(VISUALIZADOR)
+  username String @unique
+  passwordHash String
+  email String? @unique
+  role Role @default(VENDEDOR)
   status Status @default(ACTIVO)
   createdAt DateTime @default(now())
   movements InventoryMovement[]

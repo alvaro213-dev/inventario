@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { ProductActions } from "@/components/product-actions";
+import { ProductActions } from "@/components/product-actions"; import { getSession } from "@/lib/auth";
 
-export default async function ProductsPage() {
+export default async function ProductsPage() { const session = await getSession(); const canManage = session.role === "ADMINISTRADOR" || session.role === "OPERADOR";
   const products = await prisma.product.findMany({
     include: {
       category: true,
@@ -81,7 +81,7 @@ export default async function ProductsPage() {
                 </td>
 
                 <td>
-                  <ProductActions id={p.id} name={p.name} status={p.status} />
+                  {canManage ? <ProductActions id={p.id} name={p.name} status={p.status} /> : <span className="text-xs text-slate-400">Sin permisos</span>}
                 </td>
               </tr>
             ))}

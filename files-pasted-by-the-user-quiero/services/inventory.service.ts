@@ -2,8 +2,9 @@ import { MovementType, Prisma, Role } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 type MovementInput = { productId: string; type: MovementType; quantity: number; unitCost?: number | null; reason: string; notes?: string | null };
 export async function registerMovement(input: MovementInput, userId: string, role: Role) {
-  const permittedRoles: Role[] = [Role.ADMINISTRADOR, Role.OPERADOR];
+  const permittedRoles: Role[] = [Role.ADMINISTRADOR, Role.VENDEDOR];
   if (!permittedRoles.includes(role)) throw new Error("No tienes permisos para registrar movimientos.");
+  if (role === Role.VENDEDOR && input.type === MovementType.AJUSTE) throw new Error("Los vendedores sólo pueden registrar entradas y salidas.");
   return prisma.$transaction(async (tx) => {
     // Row lock makes concurrent withdrawals serialize and prevents negative stock.
     const locked = await tx.$queryRaw<{ id: string; currentStock: number }[]>`SELECT id, "currentStock" FROM "Product" WHERE id = ${input.productId} FOR UPDATE`;
