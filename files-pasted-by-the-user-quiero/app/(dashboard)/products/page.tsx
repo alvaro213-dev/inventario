@@ -81,7 +81,7 @@ export default async function ProductsPage() {
                 </td>
 
                 <td>
-                  <ProductActions id={p.id} name={p.name} />
+                  <ProductActions id={p.id} name={p.name} status={p.status} />
                 </td>
               </tr>
             ))}
