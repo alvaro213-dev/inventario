@@ -1,9 +1,7 @@
+import * as XLSX from "xlsx";
 import { prisma } from "@/lib/prisma";
 
-function csvValue(value: string | number | null | undefined) {
-  const text = String(value ?? "");
-  return `"${text.replace(/"/g, '""')}"`;
-}
+export const runtime = "nodejs";
 
 export async function GET() {
   const movements = await prisma.inventoryMovement.findMany({
@@ -16,43 +14,35 @@ export async function GET() {
     },
   });
 
-  const headers = [
-    "Fecha",
-    "Usuario",
-    "Correo",
-    "Producto",
-    "SKU",
-    "Tipo",
-    "Cantidad",
-    "Stock anterior",
-    "Stock resultante",
-    "Motivo",
-  ];
+  const rows = movements.map((movement) => ({
+    Fecha: movement.createdAt.toLocaleDateString("es-CL"),
+    Usuario: movement.user.name,
+    Correo: movement.user.email,
+    Producto: movement.product.name,
+    SKU: movement.product.sku,
+    Tipo: movement.type,
+    Cantidad: movement.quantity,
+    "Stock anterior": movement.previousStock,
+    "Stock resultante": movement.resultingStock,
+    Motivo: movement.reason,
+  }));
 
-  const rows = movements.map((movement) =>
-    [
-      movement.createdAt.toLocaleDateString("es-CL"),
-      movement.user.name,
-      movement.user.email,
-      movement.product.name,
-      movement.product.sku,
-      movement.type,
-      movement.quantity,
-      movement.previousStock,
-      movement.resultingStock,
-      movement.reason,
-    ]
-      .map(csvValue)
-      .join(";")
-  );
+  const worksheet = XLSX.utils.json_to_sheet(rows);
+  const workbook = XLSX.utils.book_new();
 
-  const csv = "\uFEFF" + [headers.join(";"), ...rows].join("\n");
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Movimientos");
 
-  return new Response(csv, {
+  const file = XLSX.write(workbook, {
+    bookType: "xlsx",
+    type: "buffer",
+  });
+
+  return new Response(file, {
     headers: {
-      "Content-Type": "text/csv; charset=utf-8",
+      "Content-Type":
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       "Content-Disposition":
-        'attachment; filename="informe-movimientos.csv"',
+        'attachment; filename="informe-movimientos.xlsx"',
     },
   });
 }
